@@ -2,12 +2,14 @@ package com.menu.hamburger;
 
 import domain.BaseHamburger;
 import domain.BreadType;
+import domain.Calculation;
 import domain.Chips;
 import domain.ComboBurger;
 import domain.Drink;
 import domain.HealthyBurger;
 import domain.MeatChoice;
 import domain.Topping;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.ArrayList;
@@ -17,21 +19,18 @@ import java.util.Scanner;
 
 @SpringBootApplication
 public class HamburgerApplication {
-    private static final double BASE_PRICE = 5.00;
-    private static final double TOPPINGS_PRICE = 1.00;
-    private static final double DRINK_PRICE = 2.00;
-    private static final double CHIPS_PRICE = 2.50;
     private static final int MAX_NR_TOPPING_BASE_BURGER = 4;
     private static final int MAX_NR_TOPPING_HEALTHY_BURGER = 6;
     private static final int HEALTHY_BURGER_ID = 2;
     private static final int COMBO_BURGER_ID = 3;
     private static final Scanner SCANNER = new Scanner(System.in);
+    private static Calculation calculation = new Calculation();
 
     public static void main(String[] args) {
         System.out.println(creatHamburgerMenu());
     }
 
-    private static BaseHamburger creatHamburgerMenu() {
+    public static BaseHamburger creatHamburgerMenu() {
         int burgerTypeId = chooseBurgerType();
         int breadTypeId = chooseBreadType();
         int meatChoiceId = chooseMeatChoice();
@@ -123,17 +122,17 @@ public class HamburgerApplication {
                                                  List<Integer> toppings, int chips, int drink) {
         switch (burgerType) {
             case 1:
-                return new BaseHamburger(BASE_PRICE, findBreadType(breadType), findMeatChoice(meatChoice),
-                        findToppingList(toppings), BASE_PRICE + findToppingsPrice(toppings));
+                return new BaseHamburger(calculation.getBaseHamburgerPrice(), findBreadType(breadType), findMeatChoice(meatChoice),
+                        findToppingList(toppings), calculation.getTotalPrice(burgerType,toppings));
 
             case 2:
-                return new HealthyBurger(BASE_PRICE, findBreadType(breadType), findMeatChoice(meatChoice),
-                        findToppingList(toppings), BASE_PRICE + findToppingsPrice(toppings));
+                return new HealthyBurger(calculation.getBaseHamburgerPrice(), findBreadType(breadType), findMeatChoice(meatChoice),
+                        findToppingList(toppings), calculation.getTotalPrice(burgerType,toppings));
 
             case 3:
-                return new ComboBurger(BASE_PRICE, findBreadType(breadType), findMeatChoice(meatChoice),
+                return new ComboBurger(calculation.getBaseHamburgerPrice(), findBreadType(breadType), findMeatChoice(meatChoice),
                         findToppingList(toppings), findDrink(drink), findChips(chips),
-                        BASE_PRICE + findToppingsPrice(toppings) + DRINK_PRICE + CHIPS_PRICE);
+                        calculation.getTotalPrice(burgerType,toppings));
 
             default:
                 throw new InputMismatchException("Burger type doesn't exist : " + burgerType);
@@ -171,56 +170,39 @@ public class HamburgerApplication {
         }
     }
 
-    private static List<Topping> findToppingList(List<Integer> toppingsNumber) {
-        List<Topping> toppings = new ArrayList<>();
-        List<String> toppingNames = getToppingNames(toppingsNumber);
-        for (String topping : toppingNames) {
-            toppings.add(new Topping(topping, TOPPINGS_PRICE));
-        }
-        return toppings;
-    }
 
-    private static List<String> getToppingNames(List<Integer> toppingsNumber) {
-        List<String> toppingsNameList = new ArrayList<>();
+    private static List<Topping> findToppingList(List<Integer> toppingsNumber) {
+        List<Topping> toppingsList = new ArrayList<>();
         for (Integer number : toppingsNumber) {
             switch (number) {
                 case 1:
-                    toppingsNameList.add("Cheese");
+                    toppingsList.add (new Topping("Cheese", calculation.getPricePerTopping()));
                     break;
                 case 2:
-                    toppingsNameList.add("Bacon");
+                    toppingsList.add (new Topping("Bacon", calculation.getPricePerTopping()));
                     break;
                 case 3:
-                    toppingsNameList.add("Sauce");
+                    toppingsList.add (new Topping("Sauce", calculation.getPricePerTopping()));
                     break;
                 case 4:
-                    toppingsNameList.add("Lettuce");
+                    toppingsList.add (new Topping("Lettuce", calculation.getPricePerTopping()));
                     break;
                 case 5:
-                    toppingsNameList.add("Tomato");
+                    toppingsList.add (new Topping("Tomato", calculation.getPricePerTopping()));
                     break;
                 case 6:
-                    toppingsNameList.add("Onion");
+                    toppingsList.add (new Topping ("Onion", calculation.getPricePerTopping()));
                     break;
                 default:
                     throw new InputMismatchException("Toppings doesn't exist : " + number);
             }
         }
-        return toppingsNameList;
+        return toppingsList;
 
-    }
-
-    private static Double findToppingsPrice(List<Integer> toppings) {
-        double totalToppingsPrice = 0;
-        List<Topping> toppingList = findToppingList(toppings);
-        for (Topping topping : toppingList) {
-            totalToppingsPrice += topping.getPrice();
-        }
-        return totalToppingsPrice;
     }
 
     private static Drink findDrink(int drinkId) {
-        return new Drink(getDrinkName(drinkId), DRINK_PRICE);
+        return new Drink(getDrinkName(drinkId), calculation.getDrinkPrice());
     }
 
     private static String getDrinkName(int drinkId) {
@@ -242,7 +224,7 @@ public class HamburgerApplication {
     }
 
     private static Chips findChips(int chipsId) {
-        return new Chips(getChipsName(chipsId), CHIPS_PRICE);
+        return new Chips(getChipsName(chipsId), calculation.getChipsPrice());
     }
 
     private static String getChipsName(int chipsId) {
@@ -259,4 +241,7 @@ public class HamburgerApplication {
 
     }
 
+    public static void setCalculation(Calculation calculation) {
+        HamburgerApplication.calculation = calculation;
+    }
 }

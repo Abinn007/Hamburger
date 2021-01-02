@@ -3,11 +3,11 @@ package domain;
 import java.util.List;
 
 public class BaseHamburger {
-    private final double basePrice;
-    private final BreadType breadType;
-    private final MeatChoice meatChoice;
-    private final List<Topping> toppings;
-    private final double totalPrice;
+    private double basePrice;
+    private BreadType breadType;
+    private MeatChoice meatChoice;
+    private List<Topping> toppings;
+    private double totalPrice;
 
     public BaseHamburger(double basePrice, BreadType breadType, MeatChoice meatChoice, List<Topping> toppings, double totalPrice) {
         this.basePrice = basePrice;
@@ -35,6 +35,26 @@ public class BaseHamburger {
 
     public double getTotalPrice() {
         return totalPrice;
+    }
+
+    public void setBasePrice(double basePrice) {
+        this.basePrice = basePrice;
+    }
+
+    public void setBreadType(BreadType breadType) {
+        this.breadType = breadType;
+    }
+
+    public void setMeatChoice(MeatChoice meatChoice) {
+        this.meatChoice = meatChoice;
+    }
+
+    public void setToppings(List<Topping> toppings) {
+        this.toppings = toppings;
+    }
+
+    public void setTotalPrice(double totalPrice) {
+        this.totalPrice = totalPrice;
     }
 
     @Override
